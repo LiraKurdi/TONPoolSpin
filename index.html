@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TON Slot | Throne of Nemrut</title>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- MAIN CONTENT WRAPPER -->
+  <main class="views-wrapper">
+
+    <!-- HOME VIEW -->
+    <section class="view view-home active" id="viewHome">
+      <header class="home-header">
+        <div class="home-user">
+          <div class="avatar-lg">TU</div>
+          <div class="home-user-info">
+            <div class="user-handle" id="homeUsername">Turgut</div>
+            <div class="user-balance-line">
+              <span id="balanceValHome">0.00</span>
+              <span class="ton-chip" id="currencyChip">TON</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-pool">
+          <div class="pool-label">Havuz</div>
+          <div class="pool-value">
+            <span id="poolVal">0.00</span>
+            <span class="bet-unit" id="poolCurrency">TON</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="currency-card">
+        <div class="currency-head-row">
+          <div class="currency-title">Para Birimin</div>
+          <div class="currency-desc">TON / USDT / TRY / EUR / RUB / UZS</div>
+        </div>
+        <div class="currency-select-row">
+          <select id="currencySelect" class="currency-select">
+            <option value="TON">TON</option>
+            <option value="USDT">USDT</option>
+            <option value="TRY">TRY</option>
+            <option value="EUR">EUR</option>
+            <option value="RUB">RUB</option>
+            <option value="UZS">UZS</option>
+          </select>
+        </div>
+        <div class="currency-note">
+          Kur dönüşümlerini TON API’den alacağız. Seçtiğin birimle oynarsın, kazancın da o birimde hesaplanır.
+        </div>
+      </section>
+
+      <section class="winners-card">
+        <div class="card-title-row">
+          <div class="card-title">Son Kazananlar</div>
+          <div class="live-dot"></div>
+        </div>
+        <div class="winners-ticker">
+          <div class="winners-track" id="winnersTrack"></div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- POOL / GAME VIEW -->
+    <section class="view view-pool" id="viewPool">
+      <header class="pool-topbar">
+        <div class="game-top-left">
+          <div class="balance-block">
+            <div class="balance-label">Bakiye</div>
+            <div class="balance-value">
+              <span id="balanceValGame">0.00</span>
+              <span class="ton-chip" id="balanceCurrencyGame">TON</span>
+            </div>
+          </div>
+
+          <div class="bet-block">
+            <div class="bet-label">Bahis</div>
+            <div class="bet-value">
+              <span id="betAmount">0.20</span>
+              <span class="bet-unit" id="betCurrency">TON</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pool-stats-right">
+          <div class="stat-label-sm">Toplayıcı Çarpan</div>
+          <div class="stat-mult" id="runningMultiplier">x1.00</div>
+        </div>
+      </header>
+
+      <!-- full game body -->
+      <section class="pool-body">
+        <!-- slot wrapper -->
+        <div class="slot-wrapper game-sized">
+          <div class="slot-grid" id="slotGrid"></div>
+
+          <!-- kazanma animasyonu overlay -->
+          <div class="win-fx" id="winFx" hidden>
+            <div class="win-fx-inner" id="winFxText">x20</div>
+          </div>
+        </div>
+
+        <!-- controls -->
+        <div class="actions-row">
+          <button class="small-btn" id="btnAuto">AUTO</button>
+          <button class="spin-btn" id="btnSpin">SPIN</button>
+          <button class="small-btn" id="btnBet">
+            BET <span id="betStep">+0.20</span>
+          </button>
+        </div>
+
+        <div class="note-row">
+          <div class="note-line">
+            8+ aynı ikon = patlar, yukarıdan yenileri düşer. Tek spin uzar, uzar, uzar...
+          </div>
+          <div class="note-line">
+            Çarpan ikonları (x2 / x5 / x10) toplanır. Hepsi birleşir:
+            örn. x2+x5+x10 = x17
+          </div>
+          <div class="note-line">
+            Final kazanç = Toplam Kazanç * Toplam Çarpan
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- PROFILE VIEW -->
+    <section class="view view-profile" id="viewProfile">
+      <section class="profile-card">
+        <div class="avatar-lg">TU</div>
+        <div class="profile-card-main">
+          <div class="profile-name" id="profileUsername">Turgut</div>
+          <div class="profile-balance">
+            <span id="balanceValProfile">0.00</span>
+            <span class="ton-chip" id="balanceCurrencyProfile">TON</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="wallet-card-simple">
+        <div class="row-line">
+          <div class="left-col">
+            <div class="row-label">Toplam Kazanç</div>
+            <div class="row-val">
+              <span id="totalWinnings">0.00</span>
+              <span class="row-cur" id="totalWinningsCur">TON</span>
+            </div>
+          </div>
+          <div class="right-col">
+            <div class="row-label">Ref. Geliri</div>
+            <div class="row-val">
+              <span id="refEarnings">0.00</span>
+              <span class="row-cur" id="refEarningsCur">TON</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sep-line"></div>
+
+        <div class="row-line">
+          <div class="left-col">
+            <div class="row-label">Cüzdan Bakiyesi</div>
+            <div class="row-val">
+              <span id="walletBalance">0.00</span>
+              <span class="row-cur" id="walletBalanceCur">TON</span>
+            </div>
+          </div>
+          <div class="right-col">
+            <div class="row-label">Havuz Bakiyesi</div>
+            <div class="row-val">
+              <span id="poolBalanceUser">0.00</span>
+              <span class="row-cur" id="poolBalanceUserCur">TON</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ref-row">
+          <div class="ref-left">
+            <div class="row-label">Referans Kodu</div>
+            <div class="ref-code" id="refCode">CPCL-94X</div>
+            <div class="fee-note">
+              Havuz → Cüzdan çekimlerinde 1 TON işlem ücreti alınır.
+              Havuza yükleme ücretsizdir.
+            </div>
+          </div>
+          <button class="copy-btn" id="copyRef">Kopyala</button>
+        </div>
+      </section>
+
+      <section class="profile-info-blocks">
+        <div class="info-block">
+          <div class="info-head">Sonsuz Komisyon</div>
+          <p>
+            Her turda toplam bahsin %3.5’i sistem payı.
+            Bu payın %20’si seni davet eden kişiye ömür boyu gider.
+          </p>
+        </div>
+
+        <div class="info-block">
+          <div class="info-head">Havuz Mantığı</div>
+          <p>
+            Oynadığın bahis havuza akar.
+            Kazançların havuzdan ödenir.
+            Havuz bakiyeni istediğin zaman cüzdanına çekebilirsin (1 TON fee).
+          </p>
+        </div>
+
+        <div class="info-block">
+          <div class="info-head">Çarpan Avı</div>
+          <p>
+            Tek bir spin içinde ikonlar patladıkça yeni ikonlar düşer.
+            Çarpan ikonları (x2,x5,x10...) toplanır.
+            Sonunda hepsi tek seferde uygulanır.
+          </p>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM TAB BAR -->
+  <nav class="tabbar">
+    <button class="tab-btn" data-view="home">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-text">Home</div>
+    </button>
+
+    <button class="tab-btn tab-btn-center" data-view="pool">
+      <div class="tab-icon-big">🎰</div>
+      <div class="tab-text">Pool</div>
+    </button>
+
+    <button class="tab-btn" data-view="profile">
+      <div class="tab-icon">👤</div>
+      <div class="tab-text">Profile</div>
+    </button>
+  </nav>
+
+  <!-- SFX -->
+  <audio id="sfxClick" src="assets/sfx/click.mp3" preload="auto"></audio>
+  <audio id="sfxSpin"  src="assets/sfx/spin.mp3"  preload="auto"></audio>
+  <audio id="sfxWin"   src="assets/sfx/win.mp3"   preload="auto"></audio>
+
+</div>
+
+<script src="assets/js/state.js"></script>
+<script src="assets/js/engine.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/home.js"></script>
+<script src="assets/js/profile.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -9,35 +9,43 @@
   const slotGridEl     = document.getElementById("slotGrid");
   const winnersTrackEl = document.getElementById("winnersTrack");
 
-  // balances
+  // balances + currency labels
   const balanceValHome     = document.getElementById("balanceValHome");
   const balanceValGame     = document.getElementById("balanceValGame");
   const balanceValProfile  = document.getElementById("balanceValProfile");
+
   const poolValEl          = document.getElementById("poolVal");
   const betAmountEl        = document.getElementById("betAmount");
-  const betStepEl          = document.getElementById("betStep");
+
+  const currencyChipEl           = document.getElementById("currencyChip");
+  const poolCurrencyEl           = document.getElementById("poolCurrency");
+  const betCurrencyEl            = document.getElementById("betCurrency");
+  const balanceCurrencyGameEl    = document.getElementById("balanceCurrencyGame");
+  const balanceCurrencyProfileEl = document.getElementById("balanceCurrencyProfile");
+  const totalWinningsCurEl       = document.getElementById("totalWinningsCur");
+  const refEarningsCurEl         = document.getElementById("refEarningsCur");
+  const walletBalanceCurEl       = document.getElementById("walletBalanceCur");
+  const poolBalanceUserCurEl     = document.getElementById("poolBalanceUserCur");
+
   const totalWinningsEl    = document.getElementById("totalWinnings");
   const refEarningsEl      = document.getElementById("refEarnings");
   const walletBalanceEl    = document.getElementById("walletBalance");
   const poolBalanceUserEl  = document.getElementById("poolBalanceUser");
 
-  // currency labels
-  const currencyChipEl          = document.getElementById("currencyChip");
-  const poolCurrencyEl          = document.getElementById("poolCurrency");
-  const betCurrencyEl           = document.getElementById("betCurrency");
-  const balanceCurrencyGameEl   = document.getElementById("balanceCurrencyGame");
-  const balanceCurrencyProfileEl= document.getElementById("balanceCurrencyProfile");
-  const totalWinningsCurEl      = document.getElementById("totalWinningsCur");
-  const refEarningsCurEl        = document.getElementById("refEarningsCur");
-  const walletBalanceCurEl      = document.getElementById("walletBalanceCur");
-  const poolBalanceUserCurEl    = document.getElementById("poolBalanceUserCur");
-
-  // runtime visuals
   const runningMultiplierEl = document.getElementById("runningMultiplier");
+
   const winFxEl     = document.getElementById("winFx");
   const winFxTextEl = document.getElementById("winFxText");
 
-  // sfx
+  const winBannerEl     = document.getElementById("winBanner");
+  const winTierTextEl   = document.getElementById("winTierText");
+  const winAmountTextEl = document.getElementById("winAmountText");
+  const winCurrencyTextEl = document.getElementById("winCurrencyText");
+  const winMultTextEl   = document.getElementById("winMultText");
+
+  const spinHistoryStripEl = document.getElementById("spinHistoryStrip");
+
+  // sfx refs
   const sfxClick = document.getElementById("sfxClick");
   const sfxSpin  = document.getElementById("sfxSpin");
   const sfxWin   = document.getElementById("sfxWin");
@@ -62,8 +70,8 @@
     playClick();
   }
 
-  // --- RENDER REELS ---
-  // drawGrid: direkt final grid'i DOM'a basar
+  // --- GRID RENDER ---
+  // drawGrid: render gridFinal from engine into 6x5 cells
   function drawGrid(grid){
     slotGridEl.innerHTML = "";
     for (let c=0;c<6;c++){
@@ -76,7 +84,10 @@
         const sym = grid[c][r];
         const cell=document.createElement("div");
         cell.className="cell";
-        cell.textContent = sym || ""; // null ise boş
+        if (sym && (sym==="x2"||sym==="x5"||sym==="x10")) {
+          cell.classList.add("multiplier");
+        }
+        cell.textContent = sym || "";
         track.appendChild(cell);
       }
 
@@ -85,10 +96,9 @@
     }
   }
 
-  // spinAnimationStub: reel sanki dönüyor gibi minicik animasyon
-  // sonra callback ile final draw'a geçiyoruz
+  // spinAnimationStub:
+  // flash-style update (lightweight for Telegram WebApp perf)
   function spinAnimationStub(finalGrid, cb){
-    // basit efekt: opacity flash
     slotGridEl.style.transition="opacity .15s";
     slotGridEl.style.opacity="0";
     requestAnimationFrame(()=>{
@@ -100,6 +110,7 @@
     });
   }
 
+  // multiplier bubble in board corner
   function showMultiplierFx(mult){
     winFxTextEl.textContent = "x"+mult.toFixed(2);
     winFxEl.hidden = false;
@@ -108,52 +119,72 @@
     playWin();
   }
 
-  // update ticker
+  // win banner
+  function showWinBanner({tier, amount, currency, mult}){
+    if (parseFloat(amount) > 0){
+      winTierTextEl.textContent   = tier;
+      winAmountTextEl.textContent = "+"+amount;
+      winCurrencyTextEl.textContent = currency;
+      winMultTextEl.textContent   = "("+mult+")";
+      winBannerEl.hidden = false;
+    } else {
+      winBannerEl.hidden = true;
+    }
+  }
+
+  // ticker
   function renderWinnersTicker(){
     const list=[...S.winnersTicker, ...S.winnersTicker];
     winnersTrackEl.innerHTML = list.map(w=>{
       return `
         <div class="winner-item">
           <span class="winner-name">@${w.name}</span>
-          <span>kazandı</span>
+          <span>won</span>
           <span class="winner-amount">${w.amt}</span>
         </div>
       `;
     }).join("");
   }
 
-  // update all balances + currency labels
+  // spin history strip (last 5 spins)
+  function renderHistoryStrip(){
+    spinHistoryStripEl.innerHTML = S.history.slice(0,5).map(h=>{
+      return `<div class="spin-history-item">
+        ${h.bet} → +${h.win} ${S.currency} (${h.mult || "x1.00"})
+      </div>`;
+    }).join("");
+  }
+
+  // balances + currency labels
   function syncAll(){
     // currency labels
-    currencyChipEl.textContent         = S.currency;
-    poolCurrencyEl.textContent         = S.currency;
-    betCurrencyEl.textContent          = S.currency;
-    balanceCurrencyGameEl.textContent  = S.currency;
-    balanceCurrencyProfileEl.textContent=S.currency;
-    totalWinningsCurEl.textContent     = S.currency;
-    refEarningsCurEl.textContent       = S.currency;
-    walletBalanceCurEl.textContent     = S.currency;
-    poolBalanceUserCurEl.textContent   = S.currency;
+    currencyChipEl.textContent           = S.currency;
+    poolCurrencyEl.textContent           = S.currency;
+    betCurrencyEl.textContent            = S.currency;
+    balanceCurrencyGameEl.textContent    = S.currency;
+    balanceCurrencyProfileEl.textContent = S.currency;
+    totalWinningsCurEl.textContent       = S.currency;
+    refEarningsCurEl.textContent         = S.currency;
+    walletBalanceCurEl.textContent       = S.currency;
+    poolBalanceUserCurEl.textContent     = S.currency;
 
     // numeric balances
-    balanceValHome.textContent    = S.user.balanceTon.toFixed(2);
-    balanceValGame.textContent    = S.user.balanceTon.toFixed(2);
-    balanceValProfile.textContent = S.user.balanceTon.toFixed(2);
+    balanceValHome.textContent     = S.user.balanceTon.toFixed(2);
+    balanceValGame.textContent     = S.user.balanceTon.toFixed(2);
+    balanceValProfile.textContent  = S.user.balanceTon.toFixed(2);
 
-    poolValEl.textContent         = S.prizePoolTon.toFixed(2);
-    betAmountEl.textContent       = S.betAmount.toFixed(2);
-    betStepEl.textContent         = "+"+S.betStep.toFixed(2);
+    poolValEl.textContent          = S.prizePoolTon.toFixed(2);
+    betAmountEl.textContent        = S.betAmount.toFixed(2);
 
-    totalWinningsEl.textContent   = S.user.totalWinnings.toFixed(2);
-    refEarningsEl.textContent     = S.user.referralEarnings.toFixed(2);
-
-    walletBalanceEl.textContent   = S.user.walletBalance.toFixed(2);
-    poolBalanceUserEl.textContent = S.user.poolBalance.toFixed(2);
+    totalWinningsEl.textContent    = S.user.totalWinnings.toFixed(2);
+    refEarningsEl.textContent      = S.user.referralEarnings.toFixed(2);
+    walletBalanceEl.textContent    = S.user.walletBalance.toFixed(2);
+    poolBalanceUserEl.textContent  = S.user.poolBalance.toFixed(2);
 
     runningMultiplierEl.textContent = "x"+S.runningMultiplier.toFixed(2);
   }
 
-  // --- SFX helpers ---
+  // sfx helpers
   function playClick(){
     if(S.sfx.click && S.sfx.click.play){
       S.sfx.click.currentTime=0;
@@ -173,13 +204,14 @@
     }
   }
 
-  // public API
   window.UI = {
     showView,
     drawGrid,
     spinAnimationStub,
     showMultiplierFx,
+    showWinBanner,
     renderWinnersTicker,
+    renderHistoryStrip,
     syncAll,
     playClick,
     playSpin,

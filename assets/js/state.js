@@ -1,46 +1,45 @@
 window.AppState = {
-  // ekonomi oranları
-  houseCutRate: 0.035,          // %3.5
-  referralShareOfHouse: 0.20,   // bu %3.5 içinden %20 referrala gider
+  // protocol economics
+  houseCutRate: 0.035,        // 3.5% protocol fee per spin
+  referralShareOfHouse: 0.20, // 20% of that fee goes to referrer forever
 
-  // kullanıcı bilgileri
+  // user data
   user: {
     name: "Turgut",
     refCode: "CPCL-94X",
 
-    // oynanabilir bakiye (kullanıcının "cüzdan bakiyesi" gibi düşünebilirsin)
+    // liquid wallet balance (spendable for spins)
     balanceTon: 124.53,
 
-    // profil istatistikleri
+    // profile stats
     totalWinnings: 0.00,
     referralEarnings: 0.00,
 
-    // havuz bakiyesi (çekilebilir havuz payı)
-    poolBalance: 0.00, // kullanıcıya ait pay
-    walletBalance: 124.53 // cüzdan bakiyesi (ayrı gösteriyoruz)
+    // split balances
+    poolBalance: 0.00,     // user's "in-pool" balance
+    walletBalance: 124.53  // wallet balance mirror
   },
 
-  // oyun / bahis
-  betAmount: 0.20,
+  // spin / betting
+  betAmount: 0.20, // Pool Spin Fee
   betStep: 0.20,
   minBet: 0.20,
   maxBet: 5.00,
   autoMode: false,
 
   // runtime spin state
-  runningMultiplier: 1.00,      // x1.00 başlangıç
-  spinBaseWin: 0.00,            // cascade içindeki sembol kazançları toplamı (multipliers hariç)
+  runningMultiplier: 1.00,    // x1.00 base
+  spinBaseWin: 0.00,          // base sum before multiplier
 
-  // havuz & platform
-  prizePoolTon: 350.00,         // global havuz
-  platformBalance: 0.00,        // bize kalan kısım
-  history: [],                  // {bet, win, afterBalance, ts}
+  // pool + protocol
+  prizePoolTon: 350.00,       // global pool TVL for payouts
+  platformBalance: 0.00,      // protocol retained fee
+  history: [],                // {bet, win, mult, balanceAfter, ts}
 
-  // para birimi
-  currency: "TON",              // TON / USDT / TRY / EUR / RUB / UZS
-  // gelecekte: rate tablosu buraya gelecek (TON -> diğerleri)
+  // currency
+  currency: "TON",            // TON / USDT / TRY / EUR / RUB / UZS
 
-  // kazananlar ticker
+  // winners ticker
   winnersTicker: [
     {name:"0xAydin",  amt:"312.4 TON"},
     {name:"0xKurd",   amt:"88.9 TON"},
@@ -49,11 +48,11 @@ window.AppState = {
     {name:"0xTON",    amt:"55.5 TON"},
   ],
 
-  // semboller
+  // symbols
   SYMBOLS_BASE: ["💎","⚡","👑","🗝️","🏛️","💰","🔥","🌀"],
-  MULTIPLIER_SYMBOLS: ["x2","x5","x10"], // çarpan düşebilir
+  MULTIPLIER_SYMBOLS: ["x2","x5","x10"],
 
-  // sesler
+  // sfx refs
   sfx: {
     click: null,
     spin: null,

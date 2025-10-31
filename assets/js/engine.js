@@ -1,25 +1,22 @@
 (function(){
   const S = window.AppState;
 
-  // random sembol seç (hem normal ikonlar hem bazen multiplier)
+  // probability: 85% base symbol / 15% multiplier
   function randomSymbol() {
-    // %85 normal sembol, %15 multiplier gibi kaba bir dağılım verebiliriz
     const roll = Math.random();
     if (roll < 0.15) {
-      // multiplier
       const m = S.MULTIPLIER_SYMBOLS[
         Math.floor(Math.random()*S.MULTIPLIER_SYMBOLS.length)
       ];
       return m;
     } else {
-      // base
       return S.SYMBOLS_BASE[
         Math.floor(Math.random()*S.SYMBOLS_BASE.length)
       ];
     }
   }
 
-  // 6x5 grid üret (columns[col][row])
+  // create 6x5 grid [col][row]
   function generateGrid() {
     const cols = [];
     for (let c=0;c<6;c++){
@@ -32,12 +29,32 @@
     return cols;
   }
 
-  // clusterları bul (aynı base sembolden 8+ adet)
-  // multipliers ayrı davranır, cluster olarak sayılmaz
-  function findClusters(grid) {
-    // count base symbols
+  function isMultiplier(sym){
+    return sym === "x2" || sym === "x5" || sym === "x10";
+  }
+
+  function parseMultiplier(sym){
+    return parseFloat(sym.replace("x",""));
+  }
+
+  // find multiplier stones in grid
+  function findMultipliers(grid){
+    const found = [];
+    for (let r=0;r<5;r++){
+      for (let c=0;c<6;c++){
+        const sym = grid[c][r];
+        if (isMultiplier(sym)) {
+          found.push({c,r,value:parseMultiplier(sym)});
+        }
+      }
+    }
+    return found;
+  }
+
+  // find clusters of same base symbol with count >= 8
+  function findClusters(grid){
     const counts = {};
-    const coordMap = {}; // symbol -> array of {c,r}
+    const coordMap = {};
     for (let r=0;r<5;r++){
       for (let c=0;c<6;c++){
         const sym = grid[c][r];
@@ -51,121 +68,82 @@
         coordMap[sym].push({c,r});
       }
     }
-
     const clusters = [];
     for (const sym in counts){
       if (counts[sym] >= 8){
         clusters.push({
           symbol: sym,
-          cells: coordMap[sym],
-          count: counts[sym]
+          count: counts[sym],
+          cells: coordMap[sym]
         });
       }
     }
     return clusters;
   }
 
-  // multipliers bul (x2/x5/x10)
-  function findMultipliers(grid){
-    const found = [];
-    for (let r=0;r<5;r++){
-      for (let c=0;c<6;c++){
-        const sym = grid[c][r];
-        if (isMultiplier(sym)) {
-          found.push({c,r, value: parseMultiplier(sym)});
-        }
-      }
-    }
-    return found;
-  }
-
-  function isMultiplier(sym){
-    return sym === "x2" || sym === "x5" || sym === "x10";
-  }
-
-  function parseMultiplier(sym){
-    // "x2" -> 2
-    // "x10" -> 10
-    return parseFloat(sym.replace("x",""));
-  }
-
-  // kazanç değeri: örnek formül
-  // clusterCount * betAmount * 0.25
-  // (bunu ileride tabloya çevirebiliriz)
+  // formula for base win before multiplier
+  // reward grows with cluster size and bet amount
   function basePayoutForCluster(clusterCount, bet){
     return bet * clusterCount * 0.25;
   }
 
-  // cluster ve multiplier hücrelerini boşalt (null yap)
+  // clear chosen cells (set null)
   function clearCells(grid, cells){
     cells.forEach(({c,r})=>{
       grid[c][r] = null;
     });
   }
 
-  // Gravity: boş hücreler yukarı çekilip doldurulsun
-  // yani sütun bazlı aşağı kaydırma
+  // gravity + refill (column-wise)
   function applyGravityAndRefill(grid){
     for (let c=0;c<6;c++){
       const col = grid[c];
-      // çek aşağı: null olmayanları topla
       const compact = col.filter(v=>v!==null);
-      // kaç tane eksik?
       const missing = 5 - compact.length;
-      // üstten yeni semboller ekle
-      const newOnTop = [];
+      const refillNew = [];
       for (let i=0;i<missing;i++){
-        newOnTop.push(randomSymbol());
+        refillNew.push(randomSymbol());
       }
-      grid[c] = newOnTop.concat(compact); // üstte yeniler, altta kalanlar
+      grid[c] = refillNew.concat(compact);
     }
   }
 
-  // Tek bir TAM SPIN simülasyonu:
-  // 1. kullanıcı bet öder (henüz ekonomi düşmedik, settlement sonunda)
-  // 2. grid oluştur
-  // 3. cascade loop çalıştır: cluster patlat + multiplier topla + gravity
-  // 4. final kazancı ve final multiplier'ı döndür
-  function runFullSpin() {
-    // reset runtime spin state
+  // runFullSpin:
+  // - resets runtime state
+  // - cascade loop: collect multipliers, clear clusters, drop new symbols
+  // - returns final grid + final multiplier + total win
+  function runFullSpin(){
     S.runningMultiplier = 1.00;
-    S.spinBaseWin       = 0.00;
+    S.spinBaseWin = 0.00;
 
-    // başlangıç grid
     let grid = generateGrid();
 
-    // cascade loop
     cascadeLoop: while(true){
-      // multipliers bul
+      // collect multipliers first
       const mults = findMultipliers(grid);
-      if(mults.length){
+      if (mults.length){
         let addMulti = 0;
         mults.forEach(m=>{ addMulti += m.value; });
-        // toplayıcı multiplier mantığı:
-        // x2 + x5 + x10 -> toplam 17
         S.runningMultiplier += addMulti;
-        // hepsini temizle
         clearCells(grid, mults);
       }
 
-      // clusters bul
+      // find clusters
       const clusters = findClusters(grid);
-      if(clusters.length){
-        // her cluster için ödeme topla
+      if (clusters.length){
         clusters.forEach(cl=>{
           const gain = basePayoutForCluster(cl.count, S.betAmount);
           S.spinBaseWin += gain;
-          // cluster hücrelerini temizle
           clearCells(grid, cl.cells);
         });
 
-        // gravity+refill uygula
+        // drop + refill
         applyGravityAndRefill(grid);
 
-        // bu spin devam edecek (sonsuz kazanç hissi)
+        // continue cascade
         continue cascadeLoop;
       } else {
-        // cluster yok → bitir
+        // no more clears
         break cascadeLoop;
       }
     }
@@ -180,76 +158,69 @@
     };
   }
 
-  // settlement: şimdi ekonomi çalışır.
-  // artık ödeme finalWin'e göre yapılıyor.
-  //
-  // houseCut ve referral mantığı:
-  // - totalBet = S.betAmount
-  // - houseCut = totalBet * houseCutRate
-  // - referralCut = houseCut * referralShareOfHouse
-  // - platformCut = houseCut - referralCut
-  // - pool += totalBet - houseCut
-  // sonra player kazancı: finalWin
-  //
-  function settleSpinEconomy(finalWin) {
+  // economic settlement after spin
+  // - deduct fee from wallet
+  // - distribute fee (pool growth, platform cut, referral earnings)
+  // - pay winnings from pool
+  function settleSpinEconomy(finalWin, finalMultiplier){
     const bet = S.betAmount;
     if (bet > S.user.balanceTon) {
       return {payout:0};
     }
 
-    // oyuncu bahsi öder
+    // player pays spin fee
     S.user.balanceTon = parseFloat((S.user.balanceTon - bet).toFixed(6));
-    S.user.walletBalance = S.user.balanceTon; // profil ekran sync
+    S.user.walletBalance = S.user.balanceTon;
 
-    // sistem kesintileri
-    const houseCut      = bet * S.houseCutRate;
-    const referralCut   = houseCut * S.referralShareOfHouse;
-    const platformCut   = houseCut - referralCut;
-    const toPool        = bet - houseCut;
+    // protocol fee breakdown
+    const houseCut    = bet * S.houseCutRate; // 3.5%
+    const refCut      = houseCut * S.referralShareOfHouse; // 20% of fee
+    const protocolCut = houseCut - refCut;
+    const toPool      = bet - houseCut;
 
-    // havuzu büyüt
+    // pool grows with fee remainder
     S.prizePoolTon = parseFloat((S.prizePoolTon + toPool).toFixed(6));
 
-    // referral kazancı
+    // ref earnings
     S.user.referralEarnings = parseFloat(
-      (S.user.referralEarnings + referralCut).toFixed(6)
+      (S.user.referralEarnings + refCut).toFixed(6)
     );
 
-    // platform bakiyesi
+    // protocol treasury
     S.platformBalance = parseFloat(
-      (S.platformBalance + platformCut).toFixed(6)
+      (S.platformBalance + protocolCut).toFixed(6)
     );
 
-    // oyuncu kazandı mı?
+    // payout
     let payout = finalWin;
     if (payout > 0){
-      // havuzdan öde
       if (payout > S.prizePoolTon) payout = S.prizePoolTon;
       S.prizePoolTon = parseFloat((S.prizePoolTon - payout).toFixed(6));
 
-      // oyuncunun hem cüzdan hem havuz bakiyesi artabilir.
-      // burada oyuncunun "poolBalance"ına da yansıtabiliriz veya direkt wallet'a.
-      // Şu anda direkt cüzdan bakiyesine yazıyoruz:
+      // credit player wallet
       S.user.balanceTon = parseFloat((S.user.balanceTon + payout).toFixed(6));
       S.user.walletBalance = S.user.balanceTon;
 
-      // istatistiklere yansıt
+      // stats
       S.user.totalWinnings = parseFloat(
         (S.user.totalWinnings + payout).toFixed(6)
       );
 
-      // ticker güncelle
+      // ticker
       S.winnersTicker.unshift({
         name: "YOU",
         amt: payout.toFixed(2) + " " + S.currency
       });
-      if (S.winnersTicker.length>12) S.winnersTicker.pop();
+      if (S.winnersTicker.length > 12) {
+        S.winnersTicker.pop();
+      }
     }
 
-    // history
+    // push spin history
     S.history.unshift({
       bet: bet.toFixed(2),
       win: payout.toFixed(2),
+      mult: "x"+finalMultiplier.toFixed(2),
       balanceAfter: S.user.balanceTon.toFixed(2),
       ts: Date.now()
     });
@@ -257,8 +228,16 @@
     return {payout};
   }
 
+  // helper: tier text for win banner
+  function getWinTierText(finalWin, bet){
+    if (finalWin < bet * 3)  return "COOL WIN";
+    if (finalWin < bet * 10) return "GREAT WIN";
+    return "INSANE WIN";
+  }
+
   window.Engine = {
     runFullSpin,
-    settleSpinEconomy
+    settleSpinEconomy,
+    getWinTierText
   };
 })();

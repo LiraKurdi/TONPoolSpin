@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TON Slot | Throne of Nemrut</title>
+  <title>Throne of Nemrut | Liquidity Slot Protocol</title>
 
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
 
@@ -21,7 +21,7 @@
   <!-- MAIN CONTENT WRAPPER -->
   <main class="views-wrapper">
 
-    <!-- HOME VIEW -->
+    <!-- HOME (POOL ANALYTICS) VIEW -->
     <section class="view view-home active" id="viewHome">
       <header class="home-header">
         <div class="home-user">
@@ -36,7 +36,7 @@
         </div>
 
         <div class="home-pool">
-          <div class="pool-label">Havuz</div>
+          <div class="pool-label">Global Pool TVL</div>
           <div class="pool-value">
             <span id="poolVal">0.00</span>
             <span class="bet-unit" id="poolCurrency">TON</span>
@@ -46,7 +46,7 @@
 
       <section class="currency-card">
         <div class="currency-head-row">
-          <div class="currency-title">Para Birimin</div>
+          <div class="currency-title">Your Currency</div>
           <div class="currency-desc">TON / USDT / TRY / EUR / RUB / UZS</div>
         </div>
         <div class="currency-select-row">
@@ -60,13 +60,35 @@
           </select>
         </div>
         <div class="currency-note">
-          Kur dönüşümlerini TON API’den alacağız. Seçtiğin birimle oynarsın, kazancın da o birimde hesaplanır.
+          Live FX via TON API. You play and get paid in the unit you choose.
+        </div>
+      </section>
+
+      <section class="pool-chart-card">
+        <div class="chart-head">
+          <div class="chart-title">Pool Flow</div>
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-range="1m">1m</button>
+            <button class="chart-tab" data-range="5m">5m</button>
+            <button class="chart-tab" data-range="15m">15m</button>
+            <button class="chart-tab" data-range="1h">1h</button>
+            <button class="chart-tab" data-range="4h">4h</button>
+            <button class="chart-tab" data-range="1d">1d</button>
+          </div>
+        </div>
+
+        <div class="chart-placeholder">
+          <div class="chart-line-ghost">[ chart goes here ]</div>
+          <div class="chart-meta">
+            <div class="chart-meta-val" id="chartPoolVal">350.00 TON</div>
+            <div class="chart-meta-diff positive" id="chartDiff">+3.2%</div>
+          </div>
         </div>
       </section>
 
       <section class="winners-card">
         <div class="card-title-row">
-          <div class="card-title">Son Kazananlar</div>
+          <div class="card-title">Recent Wins</div>
           <div class="live-dot"></div>
         </div>
         <div class="winners-ticker">
@@ -81,7 +103,7 @@
       <header class="pool-topbar">
         <div class="game-top-left">
           <div class="balance-block">
-            <div class="balance-label">Bakiye</div>
+            <div class="balance-label">Balance</div>
             <div class="balance-value">
               <span id="balanceValGame">0.00</span>
               <span class="ton-chip" id="balanceCurrencyGame">TON</span>
@@ -89,7 +111,7 @@
           </div>
 
           <div class="bet-block">
-            <div class="bet-label">Bahis</div>
+            <div class="bet-label">Pool Spin Fee</div>
             <div class="bet-value">
               <span id="betAmount">0.20</span>
               <span class="bet-unit" id="betCurrency">TON</span>
@@ -98,49 +120,48 @@
         </div>
 
         <div class="pool-stats-right">
-          <div class="stat-label-sm">Toplayıcı Çarpan</div>
+          <div class="stat-label-sm">Multiplier</div>
           <div class="stat-mult" id="runningMultiplier">x1.00</div>
         </div>
       </header>
 
-      <!-- full game body -->
       <section class="pool-body">
-        <!-- slot wrapper -->
+        <!-- SLOT BOARD -->
         <div class="slot-wrapper game-sized">
           <div class="slot-grid" id="slotGrid"></div>
 
-          <!-- kazanma animasyonu overlay -->
+          <!-- multiplier bubble overlay -->
           <div class="win-fx" id="winFx" hidden>
-            <div class="win-fx-inner" id="winFxText">x20</div>
+            <div class="win-fx-inner" id="winFxText">x1.00</div>
           </div>
         </div>
 
-        <!-- controls -->
+        <!-- CONTROLS -->
         <div class="actions-row">
           <button class="small-btn" id="btnAuto">AUTO</button>
           <button class="spin-btn" id="btnSpin">SPIN</button>
-          <button class="small-btn" id="btnBet">
-            BET <span id="betStep">+0.20</span>
-          </button>
+          <button class="small-btn" id="btnBet">BET+</button>
         </div>
 
-        <div class="note-row">
-          <div class="note-line">
-            8+ aynı ikon = patlar, yukarıdan yenileri düşer. Tek spin uzar, uzar, uzar...
+        <!-- WIN BANNER -->
+        <div class="win-banner" id="winBanner" hidden>
+          <div class="win-tier" id="winTierText">COOL WIN</div>
+          <div class="win-amount-line">
+            <span class="win-amount" id="winAmountText">+0.00</span>
+            <span class="win-currency" id="winCurrencyText">TON</span>
+            <span class="win-mult" id="winMultText">(x1.00)</span>
           </div>
-          <div class="note-line">
-            Çarpan ikonları (x2 / x5 / x10) toplanır. Hepsi birleşir:
-            örn. x2+x5+x10 = x17
-          </div>
-          <div class="note-line">
-            Final kazanç = Toplam Kazanç * Toplam Çarpan
-          </div>
+        </div>
+
+        <!-- HISTORY STRIP -->
+        <div class="spin-history-strip" id="spinHistoryStrip">
+          <!-- JS will inject last spins -->
         </div>
       </section>
     </section>
 
 
-    <!-- PROFILE VIEW -->
+    <!-- PROFILE / WALLET VIEW -->
     <section class="view view-profile" id="viewProfile">
       <section class="profile-card">
         <div class="avatar-lg">TU</div>
@@ -156,33 +177,14 @@
       <section class="wallet-card-simple">
         <div class="row-line">
           <div class="left-col">
-            <div class="row-label">Toplam Kazanç</div>
-            <div class="row-val">
-              <span id="totalWinnings">0.00</span>
-              <span class="row-cur" id="totalWinningsCur">TON</span>
-            </div>
-          </div>
-          <div class="right-col">
-            <div class="row-label">Ref. Geliri</div>
-            <div class="row-val">
-              <span id="refEarnings">0.00</span>
-              <span class="row-cur" id="refEarningsCur">TON</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="sep-line"></div>
-
-        <div class="row-line">
-          <div class="left-col">
-            <div class="row-label">Cüzdan Bakiyesi</div>
+            <div class="row-label">Wallet Balance</div>
             <div class="row-val">
               <span id="walletBalance">0.00</span>
               <span class="row-cur" id="walletBalanceCur">TON</span>
             </div>
           </div>
           <div class="right-col">
-            <div class="row-label">Havuz Bakiyesi</div>
+            <div class="row-label">Your Pool Balance</div>
             <div class="row-val">
               <span id="poolBalanceUser">0.00</span>
               <span class="row-cur" id="poolBalanceUserCur">TON</span>
@@ -190,43 +192,67 @@
           </div>
         </div>
 
-        <div class="ref-row">
-          <div class="ref-left">
-            <div class="row-label">Referans Kodu</div>
-            <div class="ref-code" id="refCode">CPCL-94X</div>
-            <div class="fee-note">
-              Havuz → Cüzdan çekimlerinde 1 TON işlem ücreti alınır.
-              Havuza yükleme ücretsizdir.
+        <div class="transfer-row">
+          <button class="transfer-btn" id="btnDepositToPool">Deposit to Pool</button>
+          <button class="transfer-btn outline" id="btnWithdrawFromPool">
+            Withdraw to Wallet (1 TON fee)
+          </button>
+        </div>
+
+        <div class="sep-line"></div>
+
+        <div class="row-line">
+          <div class="left-col">
+            <div class="row-label">Game Winnings</div>
+            <div class="row-val">
+              <span id="totalWinnings">0.00</span>
+              <span class="row-cur" id="totalWinningsCur">TON</span>
             </div>
           </div>
-          <button class="copy-btn" id="copyRef">Kopyala</button>
+          <div class="right-col">
+            <div class="row-label">Referral Earnings</div>
+            <div class="row-val">
+              <span id="refEarnings">0.00</span>
+              <span class="row-cur" id="refEarningsCur">TON</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ref-row">
+          <div class="ref-left">
+            <div class="row-label">Referral Code</div>
+            <div class="ref-code" id="refCode">CPCL-94X</div>
+            <div class="fee-note">
+              Every spin: 3.5% protocol fee.<br/>
+              20% of that fee is paid forever to the referrer.
+            </div>
+          </div>
+          <button class="copy-btn" id="copyRef">Copy</button>
         </div>
       </section>
 
       <section class="profile-info-blocks">
         <div class="info-block">
-          <div class="info-head">Sonsuz Komisyon</div>
+          <div class="info-head">Transparent Liquidity</div>
           <p>
-            Her turda toplam bahsin %3.5’i sistem payı.
-            Bu payın %20’si seni davet eden kişiye ömür boyu gider.
+            Spins feed the global pool. Wins are paid from the pool.
+            Soon: fully on-chain, non-custodial claims.
           </p>
         </div>
 
         <div class="info-block">
-          <div class="info-head">Havuz Mantığı</div>
+          <div class="info-head">Infinite Referral Yield</div>
           <p>
-            Oynadığın bahis havuza akar.
-            Kazançların havuzdan ödenir.
-            Havuz bakiyeni istediğin zaman cüzdanına çekebilirsin (1 TON fee).
+            Lifetime revenue share. Your code earns forever.
           </p>
         </div>
 
         <div class="info-block">
-          <div class="info-head">Çarpan Avı</div>
+          <div class="info-head">Cascade Multiplier System</div>
           <p>
-            Tek bir spin içinde ikonlar patladıkça yeni ikonlar düşer.
-            Çarpan ikonları (x2,x5,x10...) toplanır.
-            Sonunda hepsi tek seferde uygulanır.
+            Match 8+ symbols. They explode. New symbols drop.
+            Multiplier stones (x2,x5,x10) stack.
+            One spin can snowball insane.
           </p>
         </div>
       </section>
@@ -236,8 +262,8 @@
 
   <!-- BOTTOM TAB BAR -->
   <nav class="tabbar">
-    <button class="tab-btn" data-view="home">
-      <div class="tab-icon">🏠</div>
+    <button class="tab-btn active" data-view="home">
+      <div class="tab-icon">📊</div>
       <div class="tab-text">Home</div>
     </button>
 

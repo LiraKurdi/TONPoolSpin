@@ -1,295 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Throne of Nemrut | Liquidity Slot Protocol</title>
-
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
-
-  <link rel="stylesheet" href="assets/css/style.css" />
+<meta charset="UTF-8">
+<title>Kule Kumandası</title>
+<style>
+  body { margin:0; background:#222; color:white; font-family:Arial; text-align:center; height:100vh; display:flex; flex-direction:column; justify-content:center; }
+  h1 { font-size:40px; }
+  input { font-size:40px; padding:20px; width:200px; text-align:center; margin:20px; }
+  button { font-size:60px; padding:40px; background:#FF5722; border:none; color:white; border-radius:30px; margin:20px; }
+  button:disabled { background:#666; }
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+<h1>Kule Oyunu</h1>
+<p>Şifreyi Gir:</p>
+<input id="pass" type="text" maxlength="4" placeholder="1234">
+<button id="connect">Bağlan</button>
 
-<div class="app">
+<button id="drop" disabled style="flex-grow:1; margin:40px;">
+  KÜPÜ BIRAK!
+</button>
 
-  <!-- MAIN CONTENT WRAPPER -->
-  <main class="views-wrapper">
+<script>
+const urlParams = new URLSearchParams(location.search);
+const urlPass = urlParams.get('pass');
+if(urlPass) document.getElementById('pass').value = urlPass;
 
-    <!-- HOME (POOL ANALYTICS) VIEW -->
-    <section class="view view-home active" id="viewHome">
-      <header class="home-header">
-        <div class="home-user">
-          <div class="avatar-lg">TU</div>
-          <div class="home-user-info">
-            <div class="user-handle" id="homeUsername">Turgut</div>
-            <div class="user-balance-line">
-              <span id="balanceValHome">0.00</span>
-              <span class="ton-chip" id="currencyChip">TON</span>
-            </div>
-          </div>
-        </div>
+const consoleUrl = 'https://turgutoaydin.github.io/turgutoaydin/';
 
-        <div class="home-pool">
-          <div class="pool-label">Global Pool TVL</div>
-          <div class="pool-value">
-            <span id="poolVal">0.00</span>
-            <span class="bet-unit" id="poolCurrency">TON</span>
-          </div>
-        </div>
-      </header>
+document.getElementById('connect').onclick = () => {
+  const entered = document.getElementById('pass').value;
+  if(entered.length !== 4 || isNaN(entered)) return alert('4 haneli şifre gir!');
+  
+  // Şifre doğruysa (QR'dan geldiyse veya manuel doğru girdiyse) aktif et
+  document.getElementById('connect').disabled = true;
+  document.getElementById('pass').disabled = true;
+  document.getElementById('drop').disabled = false;
+  
+  alert('Bağlandı! Butona basarak küpü düşür.');
+  
+  // Telegram vibration
+  if(window.Telegram?.WebApp?.HapticFeedback) {
+    Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+  }
+};
 
-      <section class="currency-card">
-        <div class="currency-head-row">
-          <div class="currency-title">Your Currency</div>
-          <div class="currency-desc">TON / USDT / TRY / EUR / RUB / UZS</div>
-        </div>
-        <div class="currency-select-row">
-          <select id="currencySelect" class="currency-select">
-            <option value="TON">TON</option>
-            <option value="USDT">USDT</option>
-            <option value="TRY">TRY</option>
-            <option value="EUR">EUR</option>
-            <option value="RUB">RUB</option>
-            <option value="UZS">UZS</option>
-          </select>
-        </div>
-        <div class="currency-note">
-          Live FX via TON API. You play and get paid in the unit you choose.
-        </div>
-      </section>
-
-      <section class="pool-chart-card">
-        <div class="chart-head">
-          <div class="chart-title">Pool Flow</div>
-          <div class="chart-tabs">
-            <button class="chart-tab active" data-range="1m">1m</button>
-            <button class="chart-tab" data-range="5m">5m</button>
-            <button class="chart-tab" data-range="15m">15m</button>
-            <button class="chart-tab" data-range="1h">1h</button>
-            <button class="chart-tab" data-range="4h">4h</button>
-            <button class="chart-tab" data-range="1d">1d</button>
-          </div>
-        </div>
-
-        <div class="chart-placeholder">
-          <div class="chart-line-ghost">[ chart goes here ]</div>
-          <div class="chart-meta">
-            <div class="chart-meta-val" id="chartPoolVal">350.00 TON</div>
-            <div class="chart-meta-diff positive" id="chartDiff">+3.2%</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="winners-card">
-        <div class="card-title-row">
-          <div class="card-title">Recent Wins</div>
-          <div class="live-dot"></div>
-        </div>
-        <div class="winners-ticker">
-          <div class="winners-track" id="winnersTrack"></div>
-        </div>
-      </section>
-    </section>
-
-
-    <!-- POOL / GAME VIEW -->
-    <section class="view view-pool" id="viewPool">
-      <header class="pool-topbar">
-        <div class="game-top-left">
-          <div class="balance-block">
-            <div class="balance-label">Balance</div>
-            <div class="balance-value">
-              <span id="balanceValGame">0.00</span>
-              <span class="ton-chip" id="balanceCurrencyGame">TON</span>
-            </div>
-          </div>
-
-          <div class="bet-block">
-            <div class="bet-label">Pool Spin Fee</div>
-            <div class="bet-value">
-              <span id="betAmount">0.20</span>
-              <span class="bet-unit" id="betCurrency">TON</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="pool-stats-right">
-          <div class="stat-label-sm">Multiplier</div>
-          <div class="stat-mult" id="runningMultiplier">x1.00</div>
-        </div>
-      </header>
-
-      <section class="pool-body">
-        <!-- SLOT BOARD -->
-        <div class="slot-wrapper game-sized">
-          <div class="slot-grid" id="slotGrid"></div>
-
-          <!-- multiplier bubble overlay -->
-          <div class="win-fx" id="winFx" hidden>
-            <div class="win-fx-inner" id="winFxText">x1.00</div>
-          </div>
-        </div>
-
-        <!-- CONTROLS -->
-        <div class="actions-row">
-          <button class="small-btn" id="btnAuto">AUTO</button>
-          <button class="spin-btn" id="btnSpin">SPIN</button>
-          <button class="small-btn" id="btnBet">BET+</button>
-        </div>
-
-        <!-- WIN BANNER -->
-        <div class="win-banner" id="winBanner" hidden>
-          <div class="win-tier" id="winTierText">COOL WIN</div>
-          <div class="win-amount-line">
-            <span class="win-amount" id="winAmountText">+0.00</span>
-            <span class="win-currency" id="winCurrencyText">TON</span>
-            <span class="win-mult" id="winMultText">(x1.00)</span>
-          </div>
-        </div>
-
-        <!-- HISTORY STRIP -->
-        <div class="spin-history-strip" id="spinHistoryStrip">
-          <!-- JS will inject last spins -->
-        </div>
-      </section>
-    </section>
-
-
-    <!-- PROFILE / WALLET VIEW -->
-    <section class="view view-profile" id="viewProfile">
-      <section class="profile-card">
-        <div class="avatar-lg">TU</div>
-        <div class="profile-card-main">
-          <div class="profile-name" id="profileUsername">Turgut</div>
-          <div class="profile-balance">
-            <span id="balanceValProfile">0.00</span>
-            <span class="ton-chip" id="balanceCurrencyProfile">TON</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="wallet-card-simple">
-        <div class="row-line">
-          <div class="left-col">
-            <div class="row-label">Wallet Balance</div>
-            <div class="row-val">
-              <span id="walletBalance">0.00</span>
-              <span class="row-cur" id="walletBalanceCur">TON</span>
-            </div>
-          </div>
-          <div class="right-col">
-            <div class="row-label">Your Pool Balance</div>
-            <div class="row-val">
-              <span id="poolBalanceUser">0.00</span>
-              <span class="row-cur" id="poolBalanceUserCur">TON</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="transfer-row">
-          <button class="transfer-btn" id="btnDepositToPool">Deposit to Pool</button>
-          <button class="transfer-btn outline" id="btnWithdrawFromPool">
-            Withdraw to Wallet (1 TON fee)
-          </button>
-        </div>
-
-        <div class="sep-line"></div>
-
-        <div class="row-line">
-          <div class="left-col">
-            <div class="row-label">Game Winnings</div>
-            <div class="row-val">
-              <span id="totalWinnings">0.00</span>
-              <span class="row-cur" id="totalWinningsCur">TON</span>
-            </div>
-          </div>
-          <div class="right-col">
-            <div class="row-label">Referral Earnings</div>
-            <div class="row-val">
-              <span id="refEarnings">0.00</span>
-              <span class="row-cur" id="refEarningsCur">TON</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="ref-row">
-          <div class="ref-left">
-            <div class="row-label">Referral Code</div>
-            <div class="ref-code" id="refCode">CPCL-94X</div>
-            <div class="fee-note">
-              Every spin: 3.5% protocol fee.<br/>
-              20% of that fee is paid forever to the referrer.
-            </div>
-          </div>
-          <button class="copy-btn" id="copyRef">Copy</button>
-        </div>
-      </section>
-
-      <section class="profile-info-blocks">
-        <div class="info-block">
-          <div class="info-head">Transparent Liquidity</div>
-          <p>
-            Spins feed the global pool. Wins are paid from the pool.
-            Soon: fully on-chain, non-custodial claims.
-          </p>
-        </div>
-
-        <div class="info-block">
-          <div class="info-head">Infinite Referral Yield</div>
-          <p>
-            Lifetime revenue share. Your code earns forever.
-          </p>
-        </div>
-
-        <div class="info-block">
-          <div class="info-head">Cascade Multiplier System</div>
-          <p>
-            Match 8+ symbols. They explode. New symbols drop.
-            Multiplier stones (x2,x5,x10) stack.
-            One spin can snowball insane.
-          </p>
-        </div>
-      </section>
-    </section>
-
-  </main>
-
-  <!-- BOTTOM TAB BAR -->
-  <nav class="tabbar">
-    <button class="tab-btn active" data-view="home">
-      <div class="tab-icon">📊</div>
-      <div class="tab-text">Home</div>
-    </button>
-
-    <button class="tab-btn tab-btn-center" data-view="pool">
-      <div class="tab-icon-big">🎰</div>
-      <div class="tab-text">Pool</div>
-    </button>
-
-    <button class="tab-btn" data-view="profile">
-      <div class="tab-icon">👤</div>
-      <div class="tab-text">Profile</div>
-    </button>
-  </nav>
-
-  <!-- SFX -->
-  <audio id="sfxClick" src="assets/sfx/click.mp3" preload="auto"></audio>
-  <audio id="sfxSpin"  src="assets/sfx/spin.mp3"  preload="auto"></audio>
-  <audio id="sfxWin"   src="assets/sfx/win.mp3"   preload="auto"></audio>
-
-</div>
-
-<script src="assets/js/state.js"></script>
-<script src="assets/js/engine.js"></script>
-<script src="assets/js/ui.js"></script>
-<script src="assets/js/home.js"></script>
-<script src="assets/js/profile.js"></script>
-<script src="assets/js/main.js"></script>
+document.getElementById('drop').onclick = () => {
+  // Ana ekranı yeni sekmede aç + drop komutu gönder
+  window.open(consoleUrl + '?drop=1', '_blank');
+  
+  if(window.Telegram?.WebApp?.HapticFeedback) {
+    Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+  }
+};
+</script>
 </body>
 </html>

@@ -1,59 +1,1165 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>Kule Kumandası</title>
-<style>
-  body { margin:0; background:#222; color:white; font-family:Arial; text-align:center; height:100vh; display:flex; flex-direction:column; justify-content:center; }
-  h1 { font-size:40px; }
-  input { font-size:40px; padding:20px; width:200px; text-align:center; margin:20px; }
-  button { font-size:60px; padding:40px; background:#FF5722; border:none; color:white; border-radius:30px; margin:20px; }
-  button:disabled { background:#666; }
-</style>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Hacı İlbak Casino</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root{
+      /* Mushroom Kingdom inspired palette (modern neon + candy) */
+      --red:#ff3b3b;
+      --red2:#c91515;
+      --blue:#23b8ff;
+      --blue2:#007bb9;
+      --yellow:#ffd34d;
+      --yellow2:#e3b300;
+      --green:#4bff7a;
+      --green2:#17c34a;
+      --pink:#ff63c6;
+      --pink2:#cf2e8b;
+
+      --ink:#0b1020;
+      --bg0:#070a12;
+      --bg1:#0b1230;
+      --card:#111a34;
+      --card2:#0f172f;
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.06);
+      --text:#f6f7ff;
+      --muted:rgba(246,247,255,.72);
+
+      --gold:#ffd54a;
+
+      --r12:12px; --r16:16px; --r20:20px; --r24:24px;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --shadow2: 0 10px 28px rgba(0,0,0,.35);
+
+      --tap: cubic-bezier(.2,.9,.2,1);
+      --spring: cubic-bezier(.16,1,.3,1);
+
+      --grid-gap: 8px;
+      --cell-radius: 14px;
+      --cell-font: clamp(18px, 3.8vw, 26px);
+
+      /* iOS safe areas */
+      --sat: env(safe-area-inset-top);
+      --sab: env(safe-area-inset-bottom);
+
+      /* Telegram theme fallback */
+      --tg-bg: var(--bg0);
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+    html,body{ height:100%; background:var(--bg0); }
+    body{
+      font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      overflow:hidden;
+      padding-top: var(--sat);
+      padding-bottom: var(--sab);
+      background:
+        radial-gradient(1200px 500px at 20% -10%, rgba(35,184,255,.18), transparent 60%),
+        radial-gradient(900px 520px at 110% 10%, rgba(255,99,198,.16), transparent 60%),
+        radial-gradient(1000px 650px at 40% 120%, rgba(255,211,77,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg0) 55%, #05060b 100%);
+    }
+
+    /* Subtle animated background */
+    .bg{
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      overflow:hidden;
+    }
+    .aurora{
+      position:absolute; inset:-20%;
+      background:
+        radial-gradient(closest-side at 35% 40%, rgba(75,255,122,.14), transparent 62%),
+        radial-gradient(closest-side at 60% 55%, rgba(35,184,255,.16), transparent 60%),
+        radial-gradient(closest-side at 70% 35%, rgba(255,99,198,.14), transparent 60%);
+      filter: blur(22px);
+      animation: auroraMove 12s ease-in-out infinite;
+      opacity:.9;
+    }
+    @keyframes auroraMove{
+      0%,100%{ transform: translate3d(-2%, -1%, 0) rotate(-2deg) scale(1.02); }
+      50%{ transform: translate3d(2%, 1.5%, 0) rotate(2deg) scale(1.05); }
+    }
+
+    .sparkles{
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+        radial-gradient(circle at 55% 22%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+        radial-gradient(circle at 78% 38%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+        radial-gradient(circle at 35% 70%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+        radial-gradient(circle at 70% 80%, rgba(255,255,255,.08) 0 1px, transparent 2px);
+      opacity:.75;
+      animation: twinkle 6s ease-in-out infinite;
+    }
+    @keyframes twinkle{
+      0%,100%{ opacity:.55; transform: translateY(0); }
+      50%{ opacity:.85; transform: translateY(-4px); }
+    }
+
+    /* Floating emoji ornaments */
+    .orn{
+      position:absolute; font-size: clamp(22px, 6vw, 44px);
+      opacity:.14;
+      filter: drop-shadow(0 12px 18px rgba(0,0,0,.35));
+      animation: floaty 8s ease-in-out infinite;
+    }
+    .orn.o1{ left:6%; top:8%; transform: rotate(-10deg); animation-duration: 9s; }
+    .orn.o2{ right:6%; top:14%; transform: rotate(12deg); animation-duration: 10s; }
+    .orn.o3{ left:8%; bottom:18%; transform: rotate(8deg); animation-duration: 11s; }
+    .orn.o4{ right:10%; bottom:24%; transform: rotate(-12deg); animation-duration: 12s; }
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0) rotate(var(--r,0deg)); }
+      50%{ transform: translateY(-18px) rotate(calc(var(--r,0deg) + 6deg)); }
+    }
+
+    /* Layout */
+    .app{
+      position:relative;
+      z-index:1;
+      height:100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 12px 12px 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 2px 2px 0;
+    }
+
+    .icon-btn{
+      width: 46px; height:46px;
+      border:1px solid var(--stroke2);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border-radius: 14px;
+      box-shadow: var(--shadow2);
+      color: var(--text);
+      display:grid; place-items:center;
+      cursor:pointer;
+      transition: transform .12s var(--tap), filter .12s var(--tap);
+      backdrop-filter: blur(10px);
+    }
+    .icon-btn:active{ transform: scale(.94); filter: brightness(1.06); }
+
+    .balance{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(17,26,52,.88), rgba(15,23,47,.78));
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(10px);
+      min-width: 170px;
+    }
+    .badge{
+      width: 34px; height:34px;
+      border-radius: 12px;
+      display:grid; place-items:center;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,.12) 45%, rgba(0,0,0,.05) 100%),
+                  linear-gradient(135deg, var(--gold), var(--yellow2));
+      color:#111;
+      font-weight:900;
+      box-shadow: 0 10px 20px rgba(255,213,74,.20);
+    }
+    .balance-meta{ display:flex; flex-direction:column; gap:2px; }
+    .balance-label{
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(246,247,255,.70);
+      display:flex; align-items:center; gap:6px;
+      font-weight: 800;
+    }
+    .balance-amt{
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: .02em;
+      color: var(--text);
+    }
+    .balance-amt span{ color: var(--yellow); }
+
+    /* Main game panel */
+    .panel{
+      flex:1;
+      min-height: 0;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(800px 420px at 20% 10%, rgba(35,184,255,.14), transparent 60%),
+        radial-gradient(800px 420px at 90% 30%, rgba(255,99,198,.12), transparent 62%),
+        linear-gradient(180deg, rgba(17,26,52,.92), rgba(12,18,42,.86));
+      box-shadow: var(--shadow);
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 2px 2px 0;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+    }
+    .title h1{
+      font-family: Fredoka, Nunito, sans-serif;
+      font-size: 22px;
+      line-height: 1.05;
+      letter-spacing: .02em;
+      background: linear-gradient(90deg, var(--yellow), var(--pink), var(--blue));
+      -webkit-background-clip:text; background-clip:text;
+      color: transparent;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,.35));
+    }
+    .title p{
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      color: rgba(246,247,255,.78);
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .pill i{ color: rgba(255,211,77,.9); }
+
+    .sound{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .toggle{
+      width: 54px; height: 34px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      position:relative;
+      cursor:pointer;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+    }
+    .knob{
+      position:absolute;
+      top: 4px; left: 4px;
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.12));
+      border:1px solid rgba(255,255,255,.14);
+      transition: transform .22s var(--spring), background .22s var(--spring);
+      backdrop-filter: blur(10px);
+    }
+    .toggle.on{
+      background: linear-gradient(135deg, rgba(75,255,122,.28), rgba(35,184,255,.20));
+      border-color: rgba(75,255,122,.35);
+    }
+    .toggle.on .knob{ transform: translateX(20px); }
+
+    /* Grid */
+    .grid-wrap{
+      flex:1;
+      min-height: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    .grid{
+      flex:1;
+      min-height: 0;
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      gap: var(--grid-gap);
+    }
+
+    .cell{
+      border-radius: var(--cell-radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.14), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
+      box-shadow:
+        0 10px 24px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.10);
+      display:grid;
+      place-items:center;
+      font-size: var(--cell-font);
+      cursor:pointer;
+      user-select:none;
+      transform: translateZ(0);
+      transition: transform .12s var(--tap), filter .12s var(--tap), box-shadow .12s var(--tap);
+      position:relative;
+      overflow:hidden;
+    }
+    .cell:active{
+      transform: scale(.94);
+      filter: brightness(1.05);
+    }
+    .cell::after{
+      content:"";
+      position:absolute; inset:-2px;
+      background: linear-gradient(120deg, rgba(255,211,77,.22), rgba(255,99,198,.18), rgba(35,184,255,.18));
+      opacity:0;
+      transition: opacity .25s var(--tap);
+      filter: blur(12px);
+    }
+    .cell.glow::after{ opacity: 1; }
+
+    /* Rare shine sweep */
+    .cell::before{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.10) 42%, transparent 60%);
+      transform: translateX(-120%);
+      opacity:.7;
+    }
+    .cell.shine::before{ animation: shine 520ms var(--spring) 1; }
+    @keyframes shine{
+      to{ transform: translateX(120%); }
+    }
+
+    /* Split / win animations */
+    .cell.split{
+      animation: splitPop 520ms var(--spring) 1;
+    }
+    @keyframes splitPop{
+      0%{ transform: scale(1); }
+      40%{ transform: scale(1.18) rotate(-2deg); box-shadow: 0 0 0 0 rgba(255,99,198,.0), 0 10px 24px rgba(0,0,0,.35); }
+      70%{ transform: scale(.98) rotate(1deg); box-shadow: 0 0 0 18px rgba(255,99,198,.0), 0 10px 24px rgba(0,0,0,.35); }
+      100%{ transform: scale(1); }
+    }
+
+    .cell.win{
+      animation: winPulse 820ms var(--spring) 1;
+      border-color: rgba(255,213,74,.40);
+    }
+    @keyframes winPulse{
+      0%{ transform: scale(1); }
+      40%{ transform: scale(1.22); box-shadow: 0 0 0 0 rgba(255,213,74,.35), 0 18px 40px rgba(0,0,0,.40); }
+      100%{ transform: scale(1); box-shadow: 0 0 0 22px rgba(255,213,74,0), 0 10px 24px rgba(0,0,0,.35); }
+    }
+
+    /* Controls bar */
+    .controls{
+      display:grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(17,26,52,.86), rgba(15,23,47,.74));
+      box-shadow: var(--shadow2);
+      padding: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .block{ display:flex; flex-direction:column; gap: 8px; align-items:center; justify-content:center; min-width:0; }
+    .label{
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(246,247,255,.62);
+      font-weight: 900;
+    }
+
+    .bet-row{
+      width: 100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+    }
+
+    .btn{
+      border: 0;
+      border-radius: 14px;
+      height: 44px;
+      min-width: 44px;
+      padding: 0 14px;
+      color: #06101f;
+      font-weight: 1000;
+      cursor:pointer;
+      box-shadow: 0 14px 26px rgba(0,0,0,.30);
+      transition: transform .12s var(--tap), filter .12s var(--tap);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.94); filter: brightness(1.05); }
+    .btn.blue{ background: linear-gradient(135deg, var(--blue), var(--blue2)); color:#03101a; }
+    .btn.green{ background: linear-gradient(135deg, var(--green), var(--green2)); color:#04140a; }
+    .btn.red{
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color:#160303;
+      position:relative;
+      overflow:hidden;
+    }
+    .btn.red::after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), transparent 60%);
+      transform: rotate(18deg);
+      opacity:.8;
+    }
+    .btn.red span{ position:relative; z-index:1; }
+
+    .amount{
+      height: 44px;
+      min-width: 84px;
+      padding: 0 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      color: var(--yellow);
+      font-weight: 1000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      letter-spacing: .02em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    select{
+      width:100%;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-weight: 900;
+      padding: 0 12px;
+      outline:none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      appearance:none;
+      text-align:center;
+      cursor:pointer;
+    }
+
+    .spin{
+      width: 100%;
+      height: 52px;
+      border-radius: 18px;
+      font-family: Fredoka, Nunito, sans-serif;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-size: 18px;
+    }
+    .spin i{
+      animation: spin 1.4s linear infinite;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      filter:saturate(.85);
+      transform:none;
+    }
+    .btn:disabled i{ animation: none; }
+
+    /* Toast + Win modal */
+    .toast{
+      position:absolute;
+      left: 50%;
+      top: 58%;
+      transform: translate(-50%,-50%);
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.38);
+      backdrop-filter: blur(10px);
+      color: var(--gold);
+      font-weight: 1000;
+      text-shadow: 0 8px 18px rgba(0,0,0,.55);
+      box-shadow: 0 18px 40px rgba(0,0,0,.45);
+      opacity:0;
+      pointer-events:none;
+    }
+    .toast.show{ animation: toastUp 900ms var(--spring) 1; }
+    @keyframes toastUp{
+      0%{ opacity:0; transform: translate(-50%,-40%) scale(.92); }
+      25%{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+      100%{ opacity:0; transform: translate(-50%,-68%) scale(1.02); }
+    }
+
+    .win{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 99;
+      background: rgba(0,0,0,.44);
+      backdrop-filter: blur(10px);
+    }
+    .win .card{
+      width: min(420px, 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(700px 260px at 20% 10%, rgba(255,211,77,.26), transparent 60%),
+        radial-gradient(700px 260px at 90% 20%, rgba(255,99,198,.20), transparent 62%),
+        linear-gradient(180deg, rgba(17,26,52,.92), rgba(15,23,47,.84));
+      box-shadow: 0 35px 90px rgba(0,0,0,.60);
+      padding: 18px 18px 16px;
+      text-align:center;
+      animation: popIn 420ms var(--spring) 1;
+    }
+    @keyframes popIn{
+      0%{ transform: scale(.78); opacity:0; }
+      100%{ transform: scale(1); opacity:1; }
+    }
+    .win h2{
+      font-family: Fredoka, Nunito, sans-serif;
+      font-size: 22px;
+      letter-spacing: .04em;
+      background: linear-gradient(90deg, var(--gold), var(--pink), var(--blue));
+      -webkit-background-clip:text; background-clip:text;
+      color: transparent;
+    }
+    .win .amt{
+      margin-top: 10px;
+      font-size: 34px;
+      font-weight: 1000;
+      color: var(--gold);
+      text-shadow: 0 12px 22px rgba(0,0,0,.55);
+    }
+    .win .sub{
+      margin-top: 6px;
+      color: rgba(246,247,255,.78);
+      font-weight: 800;
+    }
+    .win .cta{
+      margin-top: 14px;
+      display:flex;
+      gap: 10px;
+    }
+    .win .cta .btn{
+      flex:1;
+      height: 46px;
+      border-radius: 16px;
+      font-weight: 1000;
+    }
+
+    /* Confetti particles */
+    .confetti{
+      position:fixed;
+      top:-12px;
+      width: 10px; height: 10px;
+      opacity: 0;
+      z-index: 100;
+      pointer-events:none;
+    }
+
+    /* Footer */
+    .footer{
+      text-align:center;
+      font-size: 11px;
+      color: rgba(246,247,255,.62);
+      padding: 10px 10px 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+    }
+    .dot{
+      width: 6px; height:6px; border-radius:999px;
+      background: rgba(255,255,255,.18);
+    }
+
+    /* Responsive tightening for short screens */
+    @media (max-height: 700px){
+      :root{ --grid-gap: 6px; --cell-radius: 12px; }
+      .panel{ padding: 12px; gap: 10px; }
+      .spin{ height: 48px; font-size: 16px; }
+      .controls{ padding: 10px; }
+      .balance{ padding: 10px 12px; min-width: 160px; }
+      .balance-amt{ font-size: 18px; }
+    }
+
+    /* Telegram theme helpers (optional) */
+    .tg-theme-light{
+      --bg0:#f6f7fb;
+      --bg1:#ffffff;
+      --text:#0b1020;
+      --muted: rgba(11,16,32,.65);
+      --card: #ffffff;
+      --card2:#f4f6ff;
+      --stroke: rgba(11,16,32,.10);
+      --stroke2: rgba(11,16,32,.08);
+    }
+    .tg-theme-light body{
+      background:
+        radial-gradient(1200px 500px at 20% -10%, rgba(35,184,255,.12), transparent 60%),
+        radial-gradient(900px 520px at 110% 10%, rgba(255,99,198,.10), transparent 60%),
+        linear-gradient(180deg, #ffffff 0%, #f2f5ff 55%, #eef2ff 100%);
+    }
+  </style>
 </head>
+
 <body>
-<h1>Kule Oyunu</h1>
-<p>Şifreyi Gir:</p>
-<input id="pass" type="text" maxlength="4" placeholder="1234">
-<button id="connect">Bağlan</button>
+  <div class="bg" aria-hidden="true">
+    <div class="aurora"></div>
+    <div class="sparkles"></div>
+    <div class="orn o1" style="--r:-10deg">🍄</div>
+    <div class="orn o2" style="--r:12deg">⭐</div>
+    <div class="orn o3" style="--r:8deg">🪙</div>
+    <div class="orn o4" style="--r:-12deg">👑</div>
+  </div>
 
-<button id="drop" disabled style="flex-grow:1; margin:40px;">
-  KÜPÜ BIRAK!
-</button>
+  <div class="app">
+    <div class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="Geri">
+        <i class="fas fa-arrow-left"></i>
+      </button>
 
-<script>
-const urlParams = new URLSearchParams(location.search);
-const urlPass = urlParams.get('pass');
-if(urlPass) document.getElementById('pass').value = urlPass;
+      <div class="balance" role="status" aria-live="polite">
+        <div class="badge">$</div>
+        <div class="balance-meta">
+          <div class="balance-label"><i class="fas fa-wallet"></i> BALANCE</div>
+          <div class="balance-amt"><span id="balance">10.00</span> <small style="font-weight:900; color:rgba(246,247,255,.75)">USDT</small></div>
+        </div>
+      </div>
+    </div>
 
-const consoleUrl = 'https://turgutoaydin.github.io/turgutoaydin/';
+    <div class="panel">
+      <div class="header">
+        <div class="title">
+          <h1>MAGIC MUSHROOM SPLIT</h1>
+          <p>
+            <span class="pill"><i class="fas fa-th"></i> 6×5 GRID</span>
+            <span class="pill"><i class="fas fa-hand-pointer"></i> TAP TO SPLIT</span>
+          </p>
+        </div>
 
-document.getElementById('connect').onclick = () => {
-  const entered = document.getElementById('pass').value;
-  if(entered.length !== 4 || isNaN(entered)) return alert('4 haneli şifre gir!');
-  
-  // Şifre doğruysa (QR'dan geldiyse veya manuel doğru girdiyse) aktif et
-  document.getElementById('connect').disabled = true;
-  document.getElementById('pass').disabled = true;
-  document.getElementById('drop').disabled = false;
-  
-  alert('Bağlandı! Butona basarak küpü düşür.');
-  
-  // Telegram vibration
-  if(window.Telegram?.WebApp?.HapticFeedback) {
-    Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-  }
-};
+        <div class="sound" title="Ses ve titreşim">
+          <div class="toggle on" id="soundToggle" aria-label="Ses Aç/Kapat" role="switch" aria-checked="true">
+            <div class="knob"></div>
+          </div>
+        </div>
+      </div>
 
-document.getElementById('drop').onclick = () => {
-  // Ana ekranı yeni sekmede aç + drop komutu gönder
-  window.open(consoleUrl + '?drop=1', '_blank');
-  
-  if(window.Telegram?.WebApp?.HapticFeedback) {
-    Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
-  }
-};
-</script>
+      <div class="grid-wrap">
+        <div class="grid" id="gameGrid" aria-label="Oyun ızgarası"></div>
+      </div>
+
+      <div class="controls" role="group" aria-label="Kontroller">
+        <div class="block">
+          <div class="label">BET</div>
+          <div class="bet-row">
+            <button class="btn blue" id="decreaseBet" aria-label="Azalt">−</button>
+            <div class="amount" id="betAmount">0.01</div>
+            <button class="btn blue" id="increaseBet" aria-label="Arttır">+</button>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="label">SPIN</div>
+          <button class="btn red spin" id="spinBtn">
+            <span><i class="fas fa-rotate-right"></i> SPIN</span>
+          </button>
+        </div>
+
+        <div class="block">
+          <div class="label">AUTO</div>
+          <select id="autoSpin" aria-label="Auto spin">
+            <option value="0">OFF</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <div class="footer">
+      <span>Min bet: 0.01</span><span class="dot"></span><span>Winnings auto-credit</span><span class="dot"></span><span>Telegram Mini App ready</span>
+    </div>
+  </div>
+
+  <!-- Win modal -->
+  <div class="win" id="winModal" aria-hidden="true">
+    <div class="card" role="dialog" aria-modal="true" aria-label="Kazanç">
+      <h2>🎉 WIN!</h2>
+      <div class="amt" id="winAmount">0.00 USDT</div>
+      <div class="sub">Magic Mushroom Power Activated</div>
+      <div class="cta">
+        <button class="btn green" id="continueBtn">CONTINUE</button>
+        <button class="btn blue" id="shareBtn"><i class="fas fa-share"></i> SHARE</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Telegram WebApp
+    const tg = window.Telegram?.WebApp;
+    try {
+      if (tg) {
+        tg.expand();
+        tg.setHeaderColor('#0b1020');
+        tg.setBackgroundColor('#070a12');
+        tg.enableClosingConfirmation();
+      }
+    } catch (e) {}
+
+    // State
+    const gameState = {
+      balance: 10.00,
+      bet: 0.01,
+      isSpinning: false,
+      autoSpinCount: 0,
+      autoSpinTotal: 0,
+      cells: [],
+      soundOn: true,
+      symbols: ["🍄","⭐","👑","🪙","🔴","🟡","🔵","🟢","🌀","🎯"],
+      winningCombinations: [
+        [0,1,2,3,4],
+        [5,6,7,8,9],
+        [10,11,12,13,14],
+        [15,16,17,18,19],
+        [20,21,22,23,24],
+        [25,26,27,28,29],
+        [0,6,12,18,24],
+        [4,8,12,16,20],
+      ],
+      symbolValues: {
+        "🍄": 5,
+        "⭐": 4,
+        "👑": 3.5,
+        "🪙": 3,
+        "🔴": 2.5,
+        "🟡": 2,
+        "🔵": 1.8,
+        "🟢": 1.5,
+        "🌀": 1.3,
+        "🎯": 1
+      }
+    };
+
+    // DOM
+    const gameGrid = document.getElementById('gameGrid');
+    const balanceEl = document.getElementById('balance');
+    const betEl = document.getElementById('betAmount');
+    const spinBtn = document.getElementById('spinBtn');
+    const decBet = document.getElementById('decreaseBet');
+    const incBet = document.getElementById('increaseBet');
+    const autoSpin = document.getElementById('autoSpin');
+    const backBtn = document.getElementById('backBtn');
+
+    const toast = document.getElementById('toast');
+    const winModal = document.getElementById('winModal');
+    const winAmount = document.getElementById('winAmount');
+    const continueBtn = document.getElementById('continueBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const soundToggle = document.getElementById('soundToggle');
+
+    // Helpers
+    const rnd = (min,max)=>Math.random()*(max-min)+min;
+    const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+    function haptic(type, style){
+      if (!gameState.soundOn) return;
+      if (!tg || !tg.HapticFeedback) return;
+      try{
+        if(type==="impact") tg.HapticFeedback.impactOccurred(style || "light");
+        if(type==="select") tg.HapticFeedback.selectionChanged();
+        if(type==="notify") tg.HapticFeedback.notificationOccurred(style || "success");
+      } catch(e){}
+    }
+
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.remove('show');
+      void toast.offsetWidth;
+      toast.classList.add('show');
+    }
+
+    function updateUI(){
+      balanceEl.textContent = gameState.balance.toFixed(2);
+      betEl.textContent = gameState.bet.toFixed(2);
+    }
+
+    function applyTelegramTheme(){
+      // Telegram light/dark
+      try{
+        if (tg?.colorScheme === 'light') document.documentElement.classList.add('tg-theme-light');
+      } catch(e){}
+    }
+
+    // Grid build
+    function createGrid(){
+      gameGrid.innerHTML = '';
+      gameState.cells = [];
+      for(let i=0;i<30;i++){
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+
+        const sym = pick(gameState.symbols);
+        gameState.cells.push(sym);
+        cell.textContent = sym;
+
+        // occasional shine
+        if (Math.random() < 0.08) {
+          cell.classList.add('shine');
+          setTimeout(()=>cell.classList.remove('shine'), 700);
+        }
+
+        cell.addEventListener('click', ()=>onCellClick(i));
+        gameGrid.appendChild(cell);
+      }
+    }
+
+    function markGlow(indices){
+      indices.forEach(i=>{
+        const el = document.querySelector(`.cell[data-index="${i}"]`);
+        if(!el) return;
+        el.classList.add('glow');
+        setTimeout(()=>el.classList.remove('glow'), 520);
+      });
+    }
+
+    // Split click
+    function onCellClick(index){
+      if(gameState.isSpinning) return;
+
+      const el = document.querySelector(`.cell[data-index="${index}"]`);
+      if(!el) return;
+
+      el.classList.add('split');
+      haptic("impact","light");
+
+      setTimeout(()=>{
+        const sym = pick(gameState.symbols);
+        el.textContent = sym;
+        gameState.cells[index] = sym;
+        el.classList.remove('split');
+
+        // tiny shine
+        el.classList.add('shine');
+        setTimeout(()=>el.classList.remove('shine'), 600);
+
+        checkImmediate(index);
+      }, 520);
+    }
+
+    function checkImmediate(changedIndex){
+      let win = 0;
+      const row = Math.floor(changedIndex / 6);
+      const col = changedIndex % 6;
+      const sym = gameState.cells[changedIndex];
+
+      // Horizontal
+      let h=1;
+      for(let c=col-1;c>=0;c--){ if(gameState.cells[row*6+c]===sym) h++; else break; }
+      for(let c=col+1;c<6;c++){ if(gameState.cells[row*6+c]===sym) h++; else break; }
+
+      // Vertical
+      let v=1;
+      for(let r=row-1;r>=0;r--){ if(gameState.cells[r*6+col]===sym) v++; else break; }
+      for(let r=row+1;r<5;r++){ if(gameState.cells[r*6+col]===sym) v++; else break; }
+
+      const value = gameState.symbolValues[sym] || 1;
+
+      const winCells = new Set();
+
+      if(h>=3){
+        win += gameState.bet * value * h * 0.5;
+        for(let c=0;c<6;c++){
+          const idx = row*6+c;
+          if(gameState.cells[idx]===sym) winCells.add(idx);
+        }
+      }
+      if(v>=3){
+        win += gameState.bet * value * v * 0.5;
+        for(let r=0;r<5;r++){
+          const idx = r*6+col;
+          if(gameState.cells[idx]===sym) winCells.add(idx);
+        }
+      }
+
+      if(win>0){
+        gameState.balance += win;
+        updateUI();
+
+        // animate winning cells
+        [...winCells].forEach(i=>{
+          const c = document.querySelector(`.cell[data-index="${i}"]`);
+          if(!c) return;
+          c.classList.add('win');
+          setTimeout(()=>c.classList.remove('win'), 900);
+        });
+
+        markGlow([...winCells]);
+        showToast(`+${win.toFixed(2)} USDT`);
+        haptic("notify","success");
+      }
+    }
+
+    // Spin
+    function spin(){
+      if(gameState.isSpinning) return;
+
+      if(gameState.balance < gameState.bet){
+        if(tg?.showAlert) tg.showAlert('Yeterli bakiyeniz yok!');
+        else alert('Yeterli bakiyeniz yok!');
+        return;
+      }
+
+      gameState.balance -= gameState.bet;
+      updateUI();
+
+      gameState.isSpinning = true;
+      spinBtn.disabled = true;
+      haptic("impact","medium");
+
+      const cells = [...document.querySelectorAll('.cell')];
+      let delay = 0;
+
+      cells.forEach((cell, i)=>{
+        delay += 24;
+        setTimeout(()=>{
+          cell.classList.add('glow','shine');
+          const sym = pick(gameState.symbols);
+          cell.textContent = sym;
+          gameState.cells[i] = sym;
+          setTimeout(()=>cell.classList.remove('glow'), 220);
+          setTimeout(()=>cell.classList.remove('shine'), 520);
+        }, delay);
+      });
+
+      setTimeout(()=>{
+        const totalWin = checkLines();
+        gameState.isSpinning = false;
+
+        if(gameState.autoSpinTotal>0){
+          gameState.autoSpinCount++;
+          if(gameState.autoSpinCount >= gameState.autoSpinTotal){
+            // stop
+            gameState.autoSpinTotal = 0;
+            gameState.autoSpinCount = 0;
+            autoSpin.value = "0";
+            spinBtn.disabled = false;
+            if(tg?.showAlert) tg.showAlert('Auto spin tamamlandı.');
+          } else {
+            setTimeout(spin, 700);
+          }
+        } else {
+          spinBtn.disabled = false;
+        }
+
+        // if no win, subtle feedback
+        if(totalWin<=0) haptic("impact","light");
+
+      }, delay + 520);
+    }
+
+    function checkLines(){
+      let totalWin = 0;
+      const winningCells = new Set();
+
+      gameState.winningCombinations.forEach(line=>{
+        const first = gameState.cells[line[0]];
+        let ok = true;
+        for(let i=1;i<line.length;i++){
+          if(gameState.cells[line[i]] !== first){ ok=false; break; }
+        }
+        if(ok){
+          const val = gameState.symbolValues[first] || 1;
+          const win = gameState.bet * val * line.length;
+          totalWin += win;
+          line.forEach(i=>winningCells.add(i));
+        }
+      });
+
+      if(totalWin>0){
+        gameState.balance += totalWin;
+        updateUI();
+
+        // animate
+        [...winningCells].forEach(i=>{
+          const c = document.querySelector(`.cell[data-index="${i}"]`);
+          if(!c) return;
+          c.classList.add('win');
+          setTimeout(()=>c.classList.remove('win'), 1100);
+        });
+
+        markGlow([...winningCells]);
+        fireConfetti(46);
+        openWin(totalWin);
+        haptic("notify","success");
+      }
+      return totalWin;
+    }
+
+    function openWin(amount){
+      winAmount.textContent = `${amount.toFixed(2)} USDT`;
+      winModal.style.display = 'flex';
+      winModal.setAttribute('aria-hidden','false');
+      // auto close
+      setTimeout(()=>closeWin(), 2600);
+    }
+    function closeWin(){
+      winModal.style.display = 'none';
+      winModal.setAttribute('aria-hidden','true');
+    }
+
+    function fireConfetti(count=40){
+      const colors = ['#ff3b3b','#23b8ff','#ffd34d','#4bff7a','#ff63c6','#ffffff'];
+      for(let i=0;i<count;i++){
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = (Math.random()*100) + 'vw';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.opacity = '1';
+        el.style.borderRadius = Math.random()>.5 ? '999px' : '4px';
+        const size = rnd(6,12);
+        el.style.width = size+'px';
+        el.style.height = rnd(6,14)+'px';
+        document.body.appendChild(el);
+
+        const dur = rnd(1800, 3200);
+        const x = rnd(-80, 80);
+        const rot = rnd(0, 420);
+
+        const anim = el.animate([
+          { transform: `translate3d(0,0,0) rotate(0deg)`, opacity: 1 },
+          { transform: `translate3d(${x}px, ${window.innerHeight+140}px, 0) rotate(${rot}deg)`, opacity: 0 }
+        ], { duration: dur, easing: 'cubic-bezier(.16,1,.3,1)' });
+
+        anim.onfinish = ()=> el.remove();
+      }
+    }
+
+    function updateAuto(){
+      gameState.autoSpinTotal = parseInt(autoSpin.value,10) || 0;
+      gameState.autoSpinCount = 0;
+    }
+
+    function setupBack(){
+      backBtn.addEventListener('click', ()=>{
+        if(tg?.showAlert){
+          tg.showAlert('Ana menüye yönlendirileceksiniz... (demo)');
+        } else {
+          alert('Ana menüye yönlendirileceksiniz... (demo)');
+        }
+      });
+    }
+
+    function setupSound(){
+      soundToggle.addEventListener('click', ()=>{
+        gameState.soundOn = !gameState.soundOn;
+        soundToggle.classList.toggle('on', gameState.soundOn);
+        soundToggle.setAttribute('aria-checked', gameState.soundOn ? 'true' : 'false');
+        haptic("select");
+        showToast(gameState.soundOn ? 'FX ON' : 'FX OFF');
+      });
+    }
+
+    function setupWinActions(){
+      continueBtn.addEventListener('click', ()=>{
+        closeWin();
+        haptic("select");
+      });
+
+      shareBtn.addEventListener('click', ()=>{
+        haptic("select");
+        const text = `I just won ${winAmount.textContent} in Magic Mushroom Split! 🍄✨`;
+        // Telegram share (best-effort)
+        try{
+          if(tg?.openTelegramLink){
+            const url = `https://t.me/share/url?url=${encodeURIComponent('https://t.me')}&text=${encodeURIComponent(text)}`;
+            tg.openTelegramLink(url);
+          } else if (navigator.share){
+            navigator.share({ text });
+          } else {
+            navigator.clipboard?.writeText(text);
+            showToast('Copied!');
+          }
+        } catch(e){
+          showToast('Share not available');
+        }
+      });
+    }
+
+    function init(){
+      applyTelegramTheme();
+      createGrid();
+      updateUI();
+
+      spinBtn.addEventListener('click', spin);
+
+      decBet.addEventListener('click', ()=>{
+        if(gameState.isSpinning) return;
+        if(gameState.bet > 0.01){
+          gameState.bet = Math.max(0.01, +(gameState.bet - 0.01).toFixed(2));
+          updateUI();
+          haptic("select");
+        }
+      });
+
+      incBet.addEventListener('click', ()=>{
+        if(gameState.isSpinning) return;
+        if(gameState.bet < 5.00){
+          gameState.bet = Math.min(5.00, +(gameState.bet + 0.01).toFixed(2));
+          updateUI();
+          haptic("select");
+        }
+      });
+
+      autoSpin.addEventListener('change', updateAuto);
+
+      setupBack();
+      setupSound();
+      setupWinActions();
+
+      try{ tg?.ready(); } catch(e){}
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
+0

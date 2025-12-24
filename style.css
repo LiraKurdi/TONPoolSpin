@@ -1,0 +1,395 @@
+:root{
+  --safeTop: env(safe-area-inset-top, 0px);
+  --safeBot: env(safe-area-inset-bottom, 0px);
+
+  /* Screenshot vibe: warm orange gradient */
+  --bg1:#f3954d;
+  --bg2:#de6b3c;
+  --bg3:#c85b33;
+
+  --text:#ffffff;
+  --shadow: 0 18px 50px rgba(0,0,0,.25);
+
+  /* Card tones similar to your grid */
+  --card:#bfa47a;
+  --card2:#b89b70;
+  --cardBorder: rgba(78,120,50,.35);
+  --cardInner: rgba(255,255,255,.10);
+
+  --green:#45d07a;
+  --green2:#1fb862;
+
+  --panel: rgba(255,255,255,.22);
+  --panel2: rgba(255,255,255,.14);
+  --stroke: rgba(255,255,255,.20);
+
+  --pill: rgba(255,90,110,.86);
+
+  --btnRed:#ff4b4b;
+  --btnRed2:#ff7a5d;
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial;
+  color: var(--text);
+  background:
+    radial-gradient(900px 700px at 30% -10%, rgba(255,255,255,.18), transparent 60%),
+    linear-gradient(180deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+  overflow:hidden;
+}
+
+.app{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  padding: calc(10px + var(--safeTop)) 14px calc(10px + var(--safeBot)) 14px;
+  gap:10px;
+}
+
+/* TOP */
+.top{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding-top: 4px;
+}
+.title-pill{
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: var(--pill);
+  box-shadow: 0 12px 28px rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.22);
+  letter-spacing: .6px;
+  font-weight: 900;
+  font-size: 22px;
+  text-shadow: 0 2px 0 rgba(0,0,0,.08);
+}
+
+/* MID */
+.mid{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  gap:12px;
+}
+
+/* GRID */
+.grid-wrap{
+  flex: 1;
+  min-height:0;
+  display:flex;
+  align-items:stretch;
+}
+.grid{
+  width:100%;
+  flex:1;
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 14px;
+  padding: 6px;
+}
+
+/* Individual cell */
+.cell{
+  border-radius: 20px;
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 2px solid rgba(108, 156, 72, .35);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.06);
+  position:relative;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  user-select:none;
+  transform: translateZ(0);
+}
+.cell::after{
+  content:"";
+  position:absolute;
+  inset: 8px;
+  border-radius: 16px;
+  background: radial-gradient(140px 90px at 40% 25%, rgba(255,255,255,.22), rgba(255,255,255,.04) 55%, transparent 70%);
+  pointer-events:none;
+}
+.symbol{
+  position:relative;
+  z-index:2;
+  font-size: 44px;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
+}
+
+/* Winning highlight */
+.cell.win{
+  border-color: rgba(255,255,255,.55);
+  background: linear-gradient(180deg, rgba(94, 227, 140, .95), rgba(33, 186, 102, .95));
+  box-shadow:
+    0 16px 40px rgba(20,120,70,.22),
+    inset 0 0 0 2px rgba(255,255,255,.14);
+  animation: pop .22s ease both;
+}
+@keyframes pop{
+  from{ transform: scale(.96); }
+  to{ transform: scale(1); }
+}
+.cell.win .symbol{ filter: drop-shadow(0 14px 22px rgba(0,0,0,.22)); }
+
+/* HUD (bottom area above nav) */
+.hud{
+  display:flex;
+  gap: 12px;
+  align-items:stretch;
+}
+
+.hud-left{
+  flex: 1.1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:0;
+}
+
+.hud-row{
+  display:flex;
+  align-items:baseline;
+  gap: 10px;
+  padding: 0 4px;
+}
+.hud-row .label{
+  font-size: 20px;
+  letter-spacing: 3px;
+  opacity:.85;
+}
+.hud-row .value{
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: 2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.hud-row.balance .label{
+  font-size: 26px;
+  letter-spacing: 4px;
+  font-weight: 800;
+  opacity:.92;
+}
+.hud-row.balance .value{
+  font-size: 18px;
+  letter-spacing: 1px;
+  opacity:.95;
+  font-weight: 800;
+}
+
+/* Last Spin Card */
+.lastspin-card{
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,70,70,.70), rgba(255,145,95,.40));
+  border: 1px solid rgba(255,255,255,.20);
+  box-shadow: var(--shadow);
+  padding: 14px 14px;
+  min-height: 86px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.lastspin-title{
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 0 rgba(0,0,0,.08);
+}
+.lastspin-body{
+  font-size: 13px;
+  line-height: 1.25;
+  opacity: .95;
+  white-space: pre-wrap;
+  overflow:hidden;
+}
+
+/* Spin Button (big circle) */
+.hud-right{
+  flex: .9;
+  display:flex;
+  justify-content:flex-end;
+  align-items:flex-end;
+}
+.spin-btn{
+  width: 160px;
+  height: 160px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,.55);
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 55%),
+              linear-gradient(180deg, var(--btnRed), var(--btnRed2));
+  box-shadow: 0 26px 60px rgba(0,0,0,.22);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  user-select:none;
+  transition: transform .08s ease;
+}
+.spin-btn:active{ transform: translateY(1px) scale(.99); }
+.spin-icon{
+  font-size: 64px;
+  font-weight: 900;
+  color:#fff;
+  text-shadow: 0 10px 25px rgba(0,0,0,.25);
+}
+.spin-btn[disabled]{
+  opacity:.65;
+  cursor:not-allowed;
+  filter: grayscale(.15);
+}
+
+/* CONTROLS */
+.controls{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  padding: 2px 4px;
+}
+
+.auto{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.auto-label{
+  font-size: 16px;
+  opacity:.9;
+  letter-spacing: 2px;
+}
+.auto-pills{
+  display:flex;
+  gap:8px;
+}
+.pill-btn{
+  border:0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.22);
+  color:#fff;
+  font-weight:900;
+  letter-spacing: 1px;
+  border:1px solid rgba(255,255,255,.20);
+  cursor:pointer;
+}
+.pill-btn.active{
+  background: rgba(0,0,0,.35);
+  border-color: rgba(255,255,255,.35);
+  box-shadow: 0 10px 20px rgba(0,0,0,.12);
+}
+
+/* Toggle (green ON) */
+.toggle{
+  border:0;
+  background: linear-gradient(180deg, rgba(32,210,100,.95), rgba(12,170,70,.95));
+  color:#fff;
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 8px 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 14px 30px rgba(0,0,0,.12);
+}
+.toggle.off{
+  background: rgba(0,0,0,.26);
+}
+.toggle-knob{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 10px 16px rgba(0,0,0,.15);
+}
+.toggle-text{
+  min-width: 26px;
+  letter-spacing: 1px;
+}
+
+/* Fee */
+.fee{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.fee-btn{
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(0,0,0,.18);
+  color:#fff;
+  font-size: 24px;
+  font-weight: 900;
+  cursor:pointer;
+}
+.fee-mid{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-width: 84px;
+}
+.fee-value{
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+.fee-label{
+  font-size: 12px;
+  opacity:.9;
+}
+
+/* Bottom Nav */
+.bottom-nav{
+  display:flex;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 10px 12px calc(10px + var(--safeBot)) 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.22);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.nav-item{
+  flex:1;
+  border:0;
+  background: transparent;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  opacity:.95;
+}
+.nav-ic{
+  font-size: 22px;
+  line-height: 1;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.12));
+}
+.nav-tx{
+  font-size: 12px;
+  letter-spacing: .6px;
+}
+.nav-item.active .nav-tx{
+  font-weight: 900;
+}
+
+/* Small-height devices: keep everything visible */
+@media (max-height: 760px){
+  .grid{ gap: 12px; }
+  .symbol{ font-size: 40px; }
+  .spin-btn{ width: 145px; height:145px; }
+  .lastspin-title{ font-size: 24px; }
+}
